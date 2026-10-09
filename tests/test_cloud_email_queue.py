@@ -12,8 +12,12 @@ class CloudEmailQueueTests(unittest.TestCase):
         render = (ROOT / "render.yaml").read_text(encoding="utf-8")
         requirements = (ROOT / "requirements.txt").read_text(encoding="utf-8")
         self.assertIn("RESEND_API_KEY", config)
+        self.assertIn("APPS_SCRIPT_URL", config)
+        self.assertIn("APPS_SCRIPT_SECRET", config)
         self.assertIn("CELERY_BROKER_URL", config)
         self.assertIn("RESEND_API_KEY", render)
+        self.assertIn("APPS_SCRIPT_URL", render)
+        self.assertIn("APPS_SCRIPT_SECRET", render)
         self.assertIn("CELERY_BROKER_URL", render)
         self.assertIn("celery[redis]", requirements)
 
