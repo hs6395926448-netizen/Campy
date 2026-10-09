@@ -92,10 +92,22 @@ def notification_status():
     """Show whether the required notification credentials are loaded."""
     return {
         "email": {
-            "configured": bool(current_app.config.get("RESEND_API_KEY") or (current_app.config.get("SMTP_HOST") and current_app.config.get("SMTP_USERNAME") and current_app.config.get("SMTP_PASSWORD") and current_app.config.get("MAIL_FROM"))),
-            "provider": "Resend API" if current_app.config.get("RESEND_API_KEY") else "SMTP",
+            "configured": bool(
+                (current_app.config.get("APPS_SCRIPT_URL") and current_app.config.get("APPS_SCRIPT_SECRET"))
+                or current_app.config.get("RESEND_API_KEY")
+                or (current_app.config.get("SMTP_HOST") and current_app.config.get("SMTP_USERNAME") and current_app.config.get("SMTP_PASSWORD") and current_app.config.get("MAIL_FROM"))
+            ),
+            "provider": (
+                "Google Apps Script + Gmail"
+                if current_app.config.get("APPS_SCRIPT_URL") and current_app.config.get("APPS_SCRIPT_SECRET")
+                else "Resend API" if current_app.config.get("RESEND_API_KEY") else "SMTP"
+            ),
             "smtp_host": current_app.config.get("SMTP_HOST", ""),
-            "mail_from": current_app.config.get("RESEND_FROM_EMAIL") if current_app.config.get("RESEND_API_KEY") else current_app.config.get("MAIL_FROM", ""),
+            "mail_from": (
+                "Gmail account configured in Apps Script"
+                if current_app.config.get("APPS_SCRIPT_URL") and current_app.config.get("APPS_SCRIPT_SECRET")
+                else current_app.config.get("RESEND_FROM_EMAIL") if current_app.config.get("RESEND_API_KEY") else current_app.config.get("MAIL_FROM", "")
+            ),
         },
         "base_url": current_app.config.get("BASE_URL", ""),
     }
