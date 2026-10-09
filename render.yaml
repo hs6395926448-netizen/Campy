@@ -23,6 +23,10 @@ services:
           property: connectionString
       - key: BASE_URL
         sync: false
+      - key: APPS_SCRIPT_URL
+        sync: false
+      - key: APPS_SCRIPT_SECRET
+        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM_EMAIL
