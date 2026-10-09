@@ -1,8 +1,10 @@
 """Reliable professional email notifications for CampusSlot."""
 from email.message import EmailMessage
 from html import escape
+import json
 import smtplib
 import ssl
+from urllib.request import Request, urlopen
 from flask import current_app, url_for
 from app.services.teacher_action_service import make_action_url
 
@@ -20,6 +22,39 @@ def _smtp_ready():
 def _send_email(to_email, subject, text_body, html_body):
     if not to_email:
         raise RuntimeError("Recipient email address is missing.")
+
+    # Google Apps Script + Gmail gateway uses HTTPS, so it works on Render Free
+    # without SMTP ports or a custom email domain. Configure both variables.
+    gateway_url = (current_app.config.get("APPS_SCRIPT_URL") or "").strip()
+    gateway_secret = current_app.config.get("APPS_SCRIPT_SECRET") or ""
+    if gateway_url or gateway_secret:
+        if not gateway_url or not gateway_secret:
+            raise RuntimeError(
+                "Google Apps Script email gateway needs both APPS_SCRIPT_URL and APPS_SCRIPT_SECRET."
+            )
+        payload = json.dumps({
+            "token": gateway_secret,
+            "to": to_email,
+            "subject": subject,
+            "text": text_body,
+            "html": html_body,
+        }).encode("utf-8")
+        request = Request(
+            gateway_url,
+            data=payload,
+            headers={"Content-Type": "application/json", "Accept": "application/json"},
+            method="POST",
+        )
+        try:
+            with urlopen(request, timeout=25) as response:
+                result = json.loads(response.read().decode("utf-8"))
+        except Exception as exc:
+            raise RuntimeError(f"Google Apps Script email gateway request failed: {exc}") from exc
+        if not isinstance(result, dict) or not result.get("ok"):
+            message = result.get("error", "Unknown gateway error") if isinstance(result, dict) else "Invalid gateway response"
+            raise RuntimeError(f"Google Apps Script email gateway rejected the email: {message}")
+        current_app.logger.info("CampusSlot Google Apps Script gateway accepted email")
+        return True
 
     # Prefer Resend's HTTPS API when configured. This avoids outbound SMTP
     # ports, which are blocked on Render Free services.
