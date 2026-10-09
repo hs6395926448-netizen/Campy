@@ -28,7 +28,11 @@ class BaseConfig:
     APPOINTMENT_TIMEZONE = os.getenv("APPOINTMENT_TIMEZONE", "Asia/Kolkata")
     DAILY_APPOINTMENT_REQUEST_LIMIT = 1
 
-    # Email API (preferred on Render Free)
+    # Google Apps Script + Gmail HTTPS gateway (preferred when configured)
+    APPS_SCRIPT_URL = os.getenv("APPS_SCRIPT_URL", "")
+    APPS_SCRIPT_SECRET = os.getenv("APPS_SCRIPT_SECRET", "")
+
+    # Email API (fallback on Render Free)
     RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
     RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "CampusSlot <onboarding@resend.dev>")
     CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "")
@@ -64,6 +68,8 @@ class ProductionConfig:
     APPLICATION_ROOT = BaseConfig.APPLICATION_ROOT
     APPOINTMENT_TIMEZONE = BaseConfig.APPOINTMENT_TIMEZONE
     DAILY_APPOINTMENT_REQUEST_LIMIT = BaseConfig.DAILY_APPOINTMENT_REQUEST_LIMIT
+    APPS_SCRIPT_URL = BaseConfig.APPS_SCRIPT_URL
+    APPS_SCRIPT_SECRET = BaseConfig.APPS_SCRIPT_SECRET
     RESEND_API_KEY = BaseConfig.RESEND_API_KEY
     RESEND_FROM_EMAIL = BaseConfig.RESEND_FROM_EMAIL
     CELERY_BROKER_URL = BaseConfig.CELERY_BROKER_URL
